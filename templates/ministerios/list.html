@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Ministérios</h2>
+
+<p>
+  <a href="{{ url_for('mostrar_cadastro_ministerio') }}">Cadastrar Ministério</a>
+</p>
+
+{% if ministerios and ministerios|length > 0 %}
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Descrição</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ministerio in ministerios %}
+        <tr>
+          <td>{{ ministerio.nome }}</td>
+          <td>{{ ministerio.descricao or '' }}</td>
+          <td>
+            <a href="{{ url_for('mostrar_edicao_ministerio', id=ministerio.id) }}">Editar</a>
+
+            <form
+              action="{{ url_for('excluir_ministerio', id=ministerio.id) }}"
+              method="POST"
+              style="display:inline;"
+              onsubmit="return confirm('Tem certeza que deseja excluir {{ ministerio.nome }}?');"
+            >
+              <button type="submit">Excluir</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>Nenhum ministério cadastrado.</p>
+{% endif %}
+
+{% endblock %}

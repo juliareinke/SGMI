@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Pessoas</h2>
+
+<p>
+  <a href="{{ url_for('mostrar_cadastro_pessoa') }}">Cadastrar pessoa</a>
+</p>
+
+{% if pessoas and pessoas|length > 0 %}
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Telefone</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pessoa in pessoas %}
+        <tr>
+          <td>{{ pessoa.nome }}</td>
+          <td>{{ pessoa.telefone or '' }}</td>
+          <td>{{ pessoa.email or '' }}</td>
+          <td>{{ pessoa.status }}</td>
+          <td>
+            <a href="{{ url_for('mostrar_edicao_pessoa', id=pessoa.id) }}">Editar</a>
+
+            <form
+              action="{{ url_for('excluir_pessoa', id=pessoa.id) }}"
+              method="POST"
+              style="display:inline;"
+              onsubmit="return confirm('Tem certeza que deseja excluir {{ pessoa.nome }}?');"
+            >
+              <button type="submit">Excluir</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>Nenhuma pessoa cadastrada.</p>
+{% endif %}
+
+{% endblock %}

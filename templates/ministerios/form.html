@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+    {% if ministerio %}
+        Editar Ministério
+    {% else %}
+        Cadastrar Ministério
+    {% endif %}
+</h2>
+
+<form method="POST">
+
+    <div>
+        <label>Nome:</label><br>
+        <input 
+            type="text" 
+            name="nome" 
+            value="{{ ministerio.nome if ministerio else '' }}" 
+            required
+        >
+    </div>
+
+    <div>
+        <label>Descrição:</label><br>
+        <input 
+            type="text" 
+            name="descricao" 
+            value="{{ ministerio.descricao if ministerio else '' }}"
+        >
+    </div>
+
+    <br>
+    <button type="submit">Salvar</button>
+    <a href="{{ url_for('listar_ministerios') }}">Cancelar</a>
+
+</form>
+
+{% endblock %}

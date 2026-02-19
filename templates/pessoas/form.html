@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+    {% if pessoa %}
+        Editar Pessoa
+    {% else %}
+        Cadastrar Pessoa
+    {% endif %}
+</h2>
+
+<form method="POST">
+
+    <div>
+        <label>Nome:</label><br>
+        <input 
+            type="text" 
+            name="nome" 
+            value="{{ pessoa.nome if pessoa else '' }}" 
+            required
+        >
+    </div>
+
+    <div>
+        <label>Telefone:</label><br>
+        <input 
+            type="text" 
+            name="telefone" 
+            value="{{ pessoa.telefone if pessoa else '' }}"
+        >
+    </div>
+
+    <div>
+        <label>Email:</label><br>
+        <input 
+            type="email" 
+            name="email" 
+            value="{{ pessoa.email if pessoa else '' }}"
+        >
+    </div>
+
+    <div>
+        <label>Status:</label><br>
+        <select name="status">
+            <option value="membro"
+                {% if pessoa and pessoa.status == "membro" %}selected{% endif %}>
+                Membro
+            </option>
+
+            <option value="visitante"
+                {% if pessoa and pessoa.status == "visitante" %}selected{% endif %}>
+                Visitante
+            </option>
+
+            <option value="voluntario"
+                {% if pessoa and pessoa.status == "voluntario" %}selected{% endif %}>
+                Voluntário
+            </option>
+        </select>
+    </div>
+
+    <br>
+    <button type="submit">Salvar</button>
+    <a href="{{ url_for('listar_pessoas') }}">Cancelar</a>
+
+</form>
+
+{% endblock %}
