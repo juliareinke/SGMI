@@ -28,6 +28,25 @@ class Ministerio(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(80), nullable=False, unique=True)
     descricao = db.Column(db.String(300), nullable=True)
+    
+class Funcao(db.Model):
+    __tablename__ = "funcoes"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(80), nullable=False)
+    
+    ministerio_id = db.Column(
+        db.Integer,
+        db.ForeignKey("ministerios.id"),
+        nullable=False
+    )
+    
+    ministerio = db.relationship("Ministerio", backref="funcoes")
+    
+    __table_args__ = (
+        db.UniqueConstraint("ministerio_id", "nome", name="uq_ministerio_nome"),
+    )
+    
 
 @app.get("/")
 def home():
@@ -125,5 +144,50 @@ def excluir_ministerio(id):
     db.session.commit()
     return redirect(url_for("listar_ministerios"))
     
+# ROTAS - FUNÇÕES
+
+@app.get("/funcoes")
+def listar_funcoes():
+    funcoes = Funcao.query.all()
+    return render_template("funcoes/list.html", funcoes = funcoes)
+
+@app.get("/funcoes/cadastro")
+def mostrar_cadastro_funcao():
+    ministerios = Ministerio.query.all()
+    return render_template("funcoes/form.html", funcao = None, ministerios = ministerios)
+
+@app.post("/funcoes/cadastro")
+def salvar_cadastro_funcao():
+    nome = request.form.get("nome")
+    ministerio_id = request.form.get("ministerio_id")
+    nova_funcao = Funcao(
+        nome = nome,
+        ministerio_id = ministerio_id
+    )
+    db.session.add(nova_funcao)
+    db.session.commit()
+    return redirect(url_for("listar_funcoes"))
+
+@app.get("/funcoes/<int:id>/editar")
+def mostrar_edicao_funcao(id):
+    funcao = db.session.get(Funcao, id)
+    ministerios = Ministerio.query.all()
+    return render_template("funcoes/form.html", funcao = funcao, ministerios = ministerios)
+
+@app.post("/funcoes/<int:id>/editar")
+def salvar_edicao_funcao(id):
+    funcao = db.session.get(Funcao, id)
+    funcao.nome = request.form.get("nome")
+    funcao.ministerio_id = request.form.get("ministerio_id")
+    db.session.commit()
+    return redirect(url_for("listar_funcoes"))
+
+@app.post("/funcoes/<int:id>/excluir")
+def excluir_funcao(id):
+    funcao = db.session.get(Funcao, id)
+    db.session.delete(funcao)
+    db.session.commit()
+    return redirect(url_for("listar_funcoes"))
+
 if __name__ == "__main__":
     app.run(debug=True)

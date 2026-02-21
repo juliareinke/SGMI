@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>
+    {% if funcao %}
+        Editar Função
+    {% else %}
+        Cadastrar Função
+    {% endif %}
+</h2>
+
+<form method="POST">
+
+    <div>
+        <label>Ministério:</label><br>
+        <select name="ministerio_id" required>
+            <option value="">Selecione</option>
+
+            {% for ministerio in ministerios %}
+                <option 
+                    value="{{ ministerio.id }}"
+                    {% if funcao and funcao.ministerio_id == ministerio.id %}
+                        selected
+                    {% endif %}
+                >
+                    {{ ministerio.nome }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div>
+        <label>Nome da Função:</label><br>
+        <input 
+            type="text"
+            name="nome"
+            value="{{ funcao.nome if funcao else '' }}"
+            required
+        >
+    </div>
+
+    <br>
+    <button type="submit">Salvar</button>
+    <a href="{{ url_for('listar_funcoes') }}">Cancelar</a>
+
+</form>
+
+{% endblock %}

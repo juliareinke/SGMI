@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Funções</h2>
+
+<p>
+  <a href="{{ url_for('mostrar_cadastro_funcao') }}">Cadastrar Função</a>
+</p>
+
+{% if funcoes and funcoes|length > 0 %}
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Ministério</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for funcao in funcoes %}
+        <tr>
+          <td>{{ funcao.nome }}</td>
+          <td>{{ funcao.ministerio.nome }}</td>
+          <td>
+            <a href="{{ url_for('mostrar_edicao_funcao', id=funcao.id) }}">Editar</a>
+
+            <form
+              action="{{ url_for('excluir_funcao', id=funcao.id) }}"
+              method="POST"
+              style="display:inline;"
+              onsubmit="return confirm('Tem certeza que deseja excluir {{ funcao.nome }}?');"
+            >
+              <button type="submit">Excluir</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>Nenhuma função cadastrada.</p>
+{% endif %}
+
+{% endblock %}
