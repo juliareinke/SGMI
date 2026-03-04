@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Funções de {{ pessoa.nome }}</h2>
+
+<p>
+  <a href="{{ url_for('listar_pessoas') }}">Voltar para Pessoas</a>
+</p>
+
+{% if funcoes and funcoes|length > 0 %}
+    <h3>Adicionar função</h3>
+    <form method="POST" action="{{ url_for('adicionar_funcao_pessoa', id=pessoa.id) }}">
+    <select name="funcao_id" required>
+        <option value="">Selecione</option>
+        {% for funcao in funcoes %}
+        <option value="{{ funcao.id }}">
+            {{ funcao.ministerio.nome }} — {{ funcao.nome }}
+        </option>
+        {% endfor %}
+    </select>
+    <button type="submit">Adicionar</button>
+    </form>
+{% else %}
+    <p><em>Esta pessoa já possui todas as funções cadastradas no sistema.</em></p>
+{% endif %}
+
+<hr>
+
+<h3>Habilidades cadastradas</h3>
+
+{% if habilidades and habilidades|length > 0 %}
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Ministério</th>
+        <th>Função</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in habilidades %}
+        <tr>
+          <td>{{ h.funcao.ministerio.nome }}</td>
+          <td>{{ h.funcao.nome }}</td>
+          <td>
+            <form
+              method="POST"
+              action="{{ url_for('remover_funcao_pessoa', id=pessoa.id, pf_id=h.id) }}"
+              style="display:inline;"
+              onsubmit="return confirm('Remover {{ h.funcao.nome }} de {{ pessoa.nome }}?');"
+            >
+              <button type="submit">Remover</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>Nenhuma função atribuída a esta pessoa.</p>
+{% endif %}
+
+{% endblock %}

@@ -29,6 +29,8 @@
           <td>
             <a href="{{ url_for('mostrar_edicao_pessoa', id=pessoa.id) }}">Editar</a>
 
+            <a href="{{ url_for('pessoa_funcoes', id=pessoa.id) }}">Funções</a>
+
             <form
               action="{{ url_for('excluir_pessoa', id=pessoa.id) }}"
               method="POST"

@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -47,6 +48,29 @@ class Funcao(db.Model):
         db.UniqueConstraint("ministerio_id", "nome", name="uq_ministerio_nome"),
     )
     
+class PessoaFuncao(db.Model):
+    __tablename__ = "pessoa_funcoes" 
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    pessoa_id = db.Column(
+        db.Integer,
+        db.ForeignKey("pessoas.id"),
+        nullable=False
+    )
+    
+    funcao_id = db.Column(
+        db.Integer,
+        db.ForeignKey("funcoes.id"),
+        nullable=False
+    )
+    
+    pessoa = db.relationship("Pessoa", backref="habilidades")
+    funcao = db.relationship("Funcao", backref="pessoas_habilitadas")
+    
+    __table_args__ = (
+        db.UniqueConstraint("pessoa_id", "funcao_id", name="uq_pessoa_funcao"),
+    )
 
 @app.get("/")
 def home():
@@ -189,5 +213,48 @@ def excluir_funcao(id):
     db.session.commit()
     return redirect(url_for("listar_funcoes"))
 
+# ROTAS - PESSOA_FUNÇÃO
+@app.get("/pessoas/<int:id>/funcoes")
+def pessoa_funcoes(id):
+    pessoa = db.session.get(Pessoa, id)
+    if not pessoa:
+        return "Pessoa não encontrada", 404
+    habilidades = PessoaFuncao.query.filter_by(pessoa_id=id).all()
+    ids_atribuidos = [h.funcao_id for h in habilidades]
+    if ids_atribuidos:
+        funcoes = Funcao.query.filter(~Funcao.id.in_(ids_atribuidos)).all()
+    else:
+        funcoes = Funcao.query.all()
+    return render_template(
+        "pessoas/funcoes.html",
+        pessoa=pessoa,
+        habilidades=habilidades,
+        funcoes=funcoes
+    )
+    
+@app.post("/pessoas/<int:id>/funcoes/adicionar")
+def adicionar_funcao_pessoa(id):
+    pessoa = db.session.get(Pessoa, id)
+    if not pessoa:
+        return "Pessoa não encotrada", 404
+    funcao_id = request.form.get("funcao_id")
+    if not funcao_id:
+        return redirect(url_for("pessoa_funcoes", id=id))
+    vínculo = PessoaFuncao(pessoa_id=id, funcao_id=int(funcao_id))
+    db.session.add(vínculo)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback() 
+    return redirect(url_for("pessoa_funcoes", id=id))
+
+@app.post("/pessoas/<int:id>/funcoes/<int:pf_id>/remover")
+def remover_funcao_pessoa(id, pf_id):
+    vínculo = db.session.get(PessoaFuncao, pf_id)
+    if vínculo:
+        db.session.delete(vínculo)
+        db.session.commit()
+    return redirect(url_for("pessoa_funcoes", id=id))
+        
 if __name__ == "__main__":
     app.run(debug=True)
